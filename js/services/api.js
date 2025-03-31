@@ -192,7 +192,55 @@ async function login(username, password) {
     }
 }
 
-// Esporta tutte le funzioni e il db
+// Add or fix the assignPoints function
+async function assignPoints(pointsData) {
+    try {
+        const response = await fetch(`${config.API_BASE_URL}/points-history`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pointsData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Server returned ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Update local data
+        db.pointsHistory.push(data);
+        
+        // Update user points
+        const userIndex = db.users.findIndex(u => u._id === pointsData.userId);
+        if (userIndex !== -1) {
+            db.users[userIndex].points = (db.users[userIndex].points || 0) + pointsData.points;
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Error assigning points:', error);
+        
+        // Add to local data anyway for offline functionality
+        const newPointsEntry = {
+            _id: 'points_' + Date.now(),
+            ...pointsData
+        };
+        db.pointsHistory.push(newPointsEntry);
+        
+        // Update user points locally
+        const userIndex = db.users.findIndex(u => u._id === pointsData.userId);
+        if (userIndex !== -1) {
+            db.users[userIndex].points = (db.users[userIndex].points || 0) + pointsData.points;
+        }
+        
+        throw error;
+    }
+}
+
+// Make sure all functions are properly exported
 export {
     db,
     fetchUsers,
@@ -205,6 +253,6 @@ export {
     deleteUser,
     saveTask,
     deleteTask,
-    assignPoints,
+    assignPoints,  // Make sure this is included in the exports
     setEmployeeOfMonth
 };
