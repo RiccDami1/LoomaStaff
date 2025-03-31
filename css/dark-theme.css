@@ -1,0 +1,349 @@
+/* Dark Theme with Modern Effects */
+:root {
+    --dark-bg: #121212;
+    --dark-surface: #1e1e1e;
+    --dark-surface-light: #2d2d2d;
+    --primary: #0082d9;
+    --primary-variant: #0057b3;
+    --secondary: #03dac6;
+    --error: #cf6679;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-disabled: rgba(255, 255, 255, 0.5);
+    --border-color: rgba(255, 255, 255, 0.12);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --glow-primary: 0 0 15px rgba(0, 99, 206, 0.653);
+    --glow-secondary: 0 0 15px rgba(3, 218, 198, 0.5);
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+/* Header and Navigation */
+.sidebar {
+    background-color: var(--dark-surface);
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.logo h2 {
+    color: var(--primary);
+    text-shadow: var(--glow-primary);
+}
+
+.nav-links li {
+    transition: transform 0.2s ease;
+    color: var(--text-secondary);
+}
+
+.nav-links li:hover {
+    transform: translateY(-2px);
+    color: var(--primary);
+    text-shadow: var(--glow-primary);
+}
+
+.nav-links li.active {
+    background-color: rgba(187, 134, 252, 0.15);
+    color: var(--primary);
+    text-shadow: var(--glow-primary);
+}
+
+/* Login Container */
+.login-form {
+    background-color: var(--dark-surface);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px var(--shadow-color);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.login-form h1 {
+    color: var(--primary);
+    text-shadow: var(--glow-primary);
+}
+
+.form-group label {
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    background-color: var(--dark-surface-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary);
+    box-shadow: var(--glow-primary);
+    outline: none;
+}
+
+#login-btn {
+    background-color: var(--primary);
+    color: #000;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#login-btn:hover {
+    background-color: var(--primary-variant);
+    color: var(--text-primary);
+    box-shadow: var(--glow-primary);
+    transform: translateY(-2px);
+}
+
+/* Dashboard */
+.stat-card {
+    background-color: var(--dark-surface);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--glow-primary);
+}
+
+.stat-card i {
+    color: var(--primary);
+}
+
+.stat-info p {
+    color: var(--primary);
+    text-shadow: var(--glow-primary);
+}
+
+/* Cards and Containers */
+.employee-card, .points-assignment, .winner-card {
+    background-color: var(--dark-surface);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.employee-card:hover, .points-assignment:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px var(--shadow-color);
+}
+
+/* Task Cards */
+.task-card {
+    background-color: var(--dark-surface);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.task-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--glow-secondary);
+}
+
+.task-card.completed {
+    border-color: var(--secondary);
+}
+
+.task-card.completed:hover {
+    box-shadow: var(--glow-secondary);
+}
+
+.task-priority.priority-high {
+    background-color: var(--error);
+    box-shadow: 0 0 10px rgba(207, 102, 121, 0.7);
+}
+
+.task-priority.priority-medium {
+    background-color: #ffb74d;
+    box-shadow: 0 0 10px rgba(255, 183, 77, 0.7);
+}
+
+.task-priority.priority-low {
+    background-color: var(--secondary);
+    box-shadow: 0 0 10px rgba(3, 218, 198, 0.7);
+}
+
+.task-status.status-completed {
+    color: var(--secondary);
+    text-shadow: 0 0 5px rgba(3, 218, 198, 0.5);
+}
+
+.task-status.status-pending {
+    color: #ffb74d;
+    text-shadow: 0 0 5px rgba(255, 183, 77, 0.5);
+}
+
+/* Buttons */
+button {
+    background-color: var(--dark-surface-light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--primary);
+    color: #000;
+    box-shadow: var(--glow-primary);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active, .tab-btn.active {
+    background-color: var(--primary);
+    color: #000;
+    box-shadow: var(--glow-primary);
+}
+
+/* Tables */
+table {
+    background-color: var(--dark-surface);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+th {
+    background-color: var(--dark-surface-light);
+    color: var(--primary);
+}
+
+tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+tr:hover {
+    background-color: rgba(187, 134, 252, 0.1);
+}
+
+/* Employee of the Month */
+.employee-avatar {
+    background-color: var(--primary-variant);
+    color: var(--text-primary);
+    box-shadow: var(--glow-primary);
+}
+
+.winner-card {
+    background-color: var(--dark-surface-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.winner-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--glow-primary);
+}
+
+/* Modals */
+.modal {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    background-color: var(--dark-surface);
+    border-radius: 10px;
+    box-shadow: 0 8px 25px var(--shadow-color);
+    border: 1px solid var(--border-color);
+}
+
+.close-modal {
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+    color: var(--error);
+    text-shadow: 0 0 10px rgba(207, 102, 121, 0.7);
+}
+
+/* Admin Panel */
+.user-card, .admin-task-card {
+    background-color: var(--dark-surface-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.user-card:hover, .admin-task-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--glow-primary);
+}
+
+.edit-btn:hover {
+    background-color: var(--primary);
+    color: #000;
+}
+
+.delete-btn:hover {
+    background-color: var(--error);
+    color: var(--text-primary);
+    box-shadow: 0 0 10px rgba(207, 102, 121, 0.7);
+}
+
+/* Points History */
+.points-history-item {
+    background-color: var(--dark-surface-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.points-history-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--glow-primary);
+}
+
+.points {
+    color: var(--secondary);
+    text-shadow: var(--glow-secondary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-surface);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-variant);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+    box-shadow: var(--glow-primary);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page {
+    animation: fadeIn 0.5s ease;
+}
+
+/* No data message */
+.no-data {
+    color: var(--text-secondary);
+}
+
+/* Error message */
+.error-message {
+    color: var(--error);
+}

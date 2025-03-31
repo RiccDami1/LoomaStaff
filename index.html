@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Looma Staff Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dark-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Change to type="module" to use ES modules -->
+    <script type="module" src="js/app.js" defer></script>
+</head>
+<body>
+    <div class="container" id="login-container">
+        <div class="login-form">
+            <h1>Looma Staff Portal</h1>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Inserisci username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Inserisci password">
+            </div>
+            <button id="login-btn">Accedi</button>
+            <div id="login-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <div class="dashboard-container" id="dashboard-container" style="display: none;">
+        <nav class="sidebar">
+            <div class="logo">
+                <h2>Looma Staff</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</li>
+                <li data-page="tasks"><i class="fas fa-tasks"></i> I Miei Lavori</li>
+                <li data-page="rankings"><i class="fas fa-trophy"></i> Classifiche</li>
+                <li data-page="employee-month"><i class="fas fa-medal"></i> Impiegato del Mese</li>
+                <li id="admin-panel" style="display: none;" data-page="admin"><i class="fas fa-user-shield"></i> Pannello Admin</li>
+                <li id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <div class="page" id="dashboard-page">
+                <h1>Dashboard</h1>
+                <div class="welcome-message">
+                    <h2>Benvenuto, <span id="user-name"></span>!</h2>
+                    <p>Ecco un riepilogo delle tue attività e statistiche.</p>
+                </div>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <i class="fas fa-tasks"></i>
+                        <div class="stat-info">
+                            <h3>Lavori Assegnati</h3>
+                            <p id="assigned-tasks">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="stat-info">
+                            <h3>Lavori Completati</h3>
+                            <p id="completed-tasks">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-star"></i>
+                        <div class="stat-info">
+                            <h3>Punti Totali</h3>
+                            <p id="total-points">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-trophy"></i>
+                        <div class="stat-info">
+                            <h3>Posizione in Classifica</h3>
+                            <p id="ranking-position">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="tasks-page" style="display: none;">
+                <h1>I Miei Lavori</h1>
+                <div class="tasks-container">
+                    <div class="tasks-filters">
+                        <button class="filter-btn active" data-filter="all">Tutti</button>
+                        <button class="filter-btn" data-filter="pending">In Corso</button>
+                        <button class="filter-btn" data-filter="completed">Completati</button>
+                    </div>
+                    <div class="tasks-list" id="tasks-list">
+                        <!-- Tasks will be loaded here dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="rankings-page" style="display: none;">
+                <h1>Classifiche</h1>
+                <div class="rankings-container">
+                    <div class="ranking-table">
+                        <h2>Classifica per Punti</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Posizione</th>
+                                    <th>Nome</th>
+                                    <th>Punti</th>
+                                </tr>
+                            </thead>
+                            <tbody id="points-ranking">
+                                <!-- Rankings will be loaded here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="employee-month-page" style="display: none;">
+                <h1>Impiegato del Mese</h1>
+                <div class="employee-month-container">
+                    <div class="employee-card" id="employee-month-card">
+                        <!-- Employee of the month will be loaded here -->
+                    </div>
+                    <div class="previous-winners">
+                        <h2>Vincitori Precedenti</h2>
+                        <div class="winners-list" id="previous-winners-list">
+                            <!-- Previous winners will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="admin-page" style="display: none;">
+                <h1>Pannello Amministratore</h1>
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="manage-users">Gestione Utenti</button>
+                    <button class="tab-btn" data-tab="manage-tasks">Gestione Lavori</button>
+                    <button class="tab-btn" data-tab="manage-points">Assegna Punti</button>
+                    <button class="tab-btn" data-tab="employee-month-select">Impiegato del Mese</button>
+                </div>
+
+                <div class="tab-content" id="manage-users-tab">
+                    <h2>Gestione Utenti</h2>
+                    <button id="add-user-btn" class="action-btn">Aggiungi Utente</button>
+                    <div class="users-list" id="users-list">
+                        <!-- Users will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="manage-tasks-tab" style="display: none;">
+                    <h2>Gestione Lavori</h2>
+                    <button id="add-task-btn" class="action-btn">Aggiungi Lavoro</button>
+                    <div class="admin-tasks-list" id="admin-tasks-list">
+                        <!-- Tasks will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="manage-points-tab" style="display: none;">
+                    <h2>Assegna Punti</h2>
+                    <div class="points-assignment">
+                        <div class="form-group">
+                            <label for="points-user">Utente</label>
+                            <select id="points-user">
+                                <!-- Users will be loaded here -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="points-amount">Punti</label>
+                            <input type="number" id="points-amount" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="points-reason">Motivazione</label>
+                            <input type="text" id="points-reason" placeholder="Motivo dell'assegnazione punti">
+                        </div>
+                        <button id="assign-points-btn" class="action-btn">Assegna Punti</button>
+                    </div>
+                    <div class="points-history">
+                        <h3>Storico Assegnazioni</h3>
+                        <div id="points-history-list">
+                            <!-- Points history will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="employee-month-select-tab" style="display: none;">
+                    <h2>Seleziona Impiegato del Mese</h2>
+                    <div class="employee-month-selection">
+                        <div class="form-group">
+                            <label for="month-select">Mese</label>
+                            <select id="month-select">
+                                <option value="1">Gennaio</option>
+                                <option value="2">Febbraio</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Aprile</option>
+                                <option value="5">Maggio</option>
+                                <option value="6">Giugno</option>
+                                <option value="7">Luglio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Settembre</option>
+                                <option value="10">Ottobre</option>
+                                <option value="11">Novembre</option>
+                                <option value="12">Dicembre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="year-select">Anno</label>
+                            <select id="year-select">
+                                <!-- Years will be dynamically added -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-select">Impiegato</label>
+                            <select id="employee-select">
+                                <!-- Employees will be loaded here -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="achievement-reason">Motivazione</label>
+                            <textarea id="achievement-reason" placeholder="Motivo del riconoscimento"></textarea>
+                        </div>
+                        <button id="set-employee-month-btn" class="action-btn">Imposta Impiegato del Mese</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="user-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="user-modal-title">Aggiungi Utente</h2>
+            <div class="form-group">
+                <label for="user-name-input">Nome</label>
+                <input type="text" id="user-name-input" placeholder="Nome completo">
+            </div>
+            <div class="form-group">
+                <label for="user-username">Username</label>
+                <input type="text" id="user-username" placeholder="Username per login">
+            </div>
+            <div class="form-group">
+                <label for="user-password">Password</label>
+                <input type="password" id="user-password" placeholder="Password">
+            </div>
+            <div class="form-group">
+                <label for="user-role">Ruolo</label>
+                <select id="user-role">
+                    <option value="user">Utente</option>
+                    <option value="admin">Amministratore</option>
+                </select>
+            </div>
+            <button id="save-user-btn" class="action-btn">Salva</button>
+        </div>
+    </div>
+
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="task-modal-title">Aggiungi Lavoro</h2>
+            <div class="form-group">
+                <label for="task-title">Titolo</label>
+                <input type="text" id="task-title" placeholder="Titolo del lavoro">
+            </div>
+            <div class="form-group">
+                <label for="task-description">Descrizione</label>
+                <textarea id="task-description" placeholder="Descrizione dettagliata"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="task-deadline">Scadenza</label>
+                <input type="date" id="task-deadline">
+            </div>
+            <div class="form-group">
+                <label for="task-assignee">Assegna a</label>
+                <select id="task-assignee">
+                    <!-- Users will be loaded here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="task-priority">Priorità</label>
+                <select id="task-priority">
+                    <option value="low">Bassa</option>
+                    <option value="medium" selected>Media</option>
+                    <option value="high">Alta</option>
+                </select>
+            </div>
+            <button id="save-task-btn" class="action-btn">Salva</button>
+        </div>
+    </div>
+
+    <div class="modal" id="task-view-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="view-task-title">Dettagli Lavoro</h2>
+            <div class="task-details">
+                <div class="detail-group">
+                    <label>Descrizione:</label>
+                    <p id="view-task-description"></p>
+                </div>
+                <div class="detail-group">
+                    <label>Scadenza:</label>
+                    <p id="view-task-deadline"></p>
+                </div>
+                <div class="detail-group">
+                    <label>Assegnato a:</label>
+                    <p id="view-task-assignee"></p>
+                </div>
+                <div class="detail-group">
+                    <label>Priorità:</label>
+                    <p id="view-task-priority"></p>
+                </div>
+                <div class="detail-group">
+                    <label>Stato:</label>
+                    <p id="view-task-status"></p>
+                </div>
+            </div>
+            <div class="task-actions" id="task-actions">
+                <button id="complete-task-btn" class="action-btn">Segna come Completato</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
