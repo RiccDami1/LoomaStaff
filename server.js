@@ -6,12 +6,17 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/loomastaff';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/')));
+
+// Log startup information
+console.log('Starting LoomaStaff server...');
+console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`Port: ${PORT}`);
 
 // Connessione al database
 mongoose.connect(MONGODB_URI)
@@ -21,43 +26,25 @@ mongoose.connect(MONGODB_URI)
     console.log('Running in fallback mode with local data');
   });
 
-// API routes - simplified version
-app.get('/api/users', (req, res) => {
-  res.json([]);  // Return empty array for now
+// Simple health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.get('/api/tasks', (req, res) => {
-  res.json([]);  // Return empty array for now
-});
+// Importa i modelli e le route
+const userRoutes = require('./server/routes/users');
+const taskRoutes = require('./server/routes/tasks');
+const pointsRoutes = require('./server/routes/points');
+const employeeRoutes = require('./server/routes/employee');
+const authRoutes = require('./server/routes/auth');
 
-app.get('/api/employee-of-month', (req, res) => {
-  res.json(null);  // Return null for now
-});
-
-app.get('/api/previous-winners', (req, res) => {
-  res.json([]);  // Return empty array for now
-});
-
-app.get('/api/points-history', (req, res) => {
-  res.json([]);  // Return empty array for now
-});
-
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  
-  // Simple fallback login
-  if (username === 'admin' && password === 'admin123') {
-    res.json({
-      _id: 'admin-id',
-      name: 'Admin User',
-      username: 'admin',
-      role: 'admin',
-      points: 0
-    });
-  } else {
-    res.status(401).json({ message: 'Invalid credentials' });
-  }
-});
+// Usa le route
+app.use('/api/users', userRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/points-history', pointsRoutes);
+app.use('/api/employee-of-month', employeeRoutes);
+app.use('/api/previous-winners', employeeRoutes);
+app.use('/api', authRoutes);
 
 // Serve l'app frontend per qualsiasi altra richiesta
 app.get('*', (req, res) => {
@@ -65,6 +52,15 @@ app.get('*', (req, res) => {
 });
 
 // Avvia il server
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Server URL: http://localhost:${PORT}`);
+});
+
+// Handle shutdown gracefully
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
 });
