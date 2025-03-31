@@ -9,74 +9,142 @@ const db = {
     pointsHistory: []
 };
 
-// Funzione helper per gestire le richieste API con timeout
-async function fetchWithTimeout(url, options = {}, timeout = 8000) {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    
-    const defaultOptions = {
-        signal: controller.signal,
-        ...options
-    };
-    
-    try {
-        const response = await fetch(url, defaultOptions);
-        clearTimeout(id);
-        return response;
-    } catch (error) {
-        clearTimeout(id);
-        throw error;
-    }
-}
-
 // API functions
 async function fetchUsers() {
     try {
-        const response = await fetchWithTimeout(`${config.API_BASE_URL}/users`);
+        const response = await fetch(`${config.API_BASE_URL}/users`);
+        if (!response.ok) throw new Error('Failed to fetch users');
         db.users = await response.json();
         return db.users;
     } catch (error) {
         console.error('Error fetching users:', error);
-        // Carica dati dal localStorage come fallback
+        // Try to load from localStorage as fallback
         const storedUsers = localStorage.getItem('loomastaff_users');
         if (storedUsers) {
             db.users = JSON.parse(storedUsers);
-            console.log('Loaded users from localStorage');
         }
         return db.users;
     }
 }
 
-// Modifica le altre funzioni API in modo simile...
-
-// Save user (create or update)
-async function saveUser(userData, userId = null) {
-    console.log('API saveUser called with:', userData, userId);
-    
-    // Salva sempre nel localStorage come backup
+async function fetchTasks() {
     try {
-        if (userId) {
-            // Update existing user
-            const userIndex = db.users.findIndex(user => user._id === userId);
-            if (userIndex !== -1) {
-                db.users[userIndex] = { ...db.users[userIndex], ...userData };
+        const response = await fetch(`${config.API_BASE_URL}/tasks`);
+        if (!response.ok) throw new Error('Failed to fetch tasks');
+        db.tasks = await response.json();
+        return db.tasks;
+    } catch (error) {
+        console.error('Error fetching tasks:', error);
+        // Try to load from localStorage as fallback
+        const storedTasks = localStorage.getItem('loomastaff_tasks');
+        if (storedTasks) {
+            db.tasks = JSON.parse(storedTasks);
+        }
+        return db.tasks;
+    }
+}
+
+async function fetchEmployeeOfMonth() {
+    try {
+        const response = await fetch(`${config.API_BASE_URL}/employee-of-month`);
+        if (!response.ok) throw new Error('Failed to fetch employee of month');
+        db.employeeOfMonth = await response.json();
+        return db.employeeOfMonth;
+    } catch (error) {
+        console.error('Error fetching employee of month:', error);
+        // Try to load from localStorage as fallback
+        const storedEmployee = localStorage.getItem('loomastaff_employee');
+        if (storedEmployee) {
+            db.employeeOfMonth = JSON.parse(storedEmployee);
+        }
+        return db.employeeOfMonth;
+    }
+}
+
+async function fetchPreviousWinners() {
+    try {
+        const response = await fetch(`${config.API_BASE_URL}/previous-winners`);
+        if (!response.ok) throw new Error('Failed to fetch previous winners');
+        db.previousWinners = await response.json();
+        return db.previousWinners;
+    } catch (error) {
+        console.error('Error fetching previous winners:', error);
+        // Try to load from localStorage as fallback
+        const storedWinners = localStorage.getItem('loomastaff_winners');
+        if (storedWinners) {
+            db.previousWinners = JSON.parse(storedWinners);
+        }
+        return db.previousWinners;
+    }
+}
+
+async function fetchPointsHistory() {
+    try {
+        const response = await fetch(`${config.API_BASE_URL}/points-history`);
+        if (!response.ok) throw new Error('Failed to fetch points history');
+        db.pointsHistory = await response.json();
+        return db.pointsHistory;
+    } catch (error) {
+        console.error('Error fetching points history:', error);
+        // Try to load from localStorage as fallback
+        const storedPoints = localStorage.getItem('loomastaff_points');
+        if (storedPoints) {
+            db.pointsHistory = JSON.parse(storedPoints);
+        }
+        return db.pointsHistory;
+    }
+}
+
+async function login(username, password) {
+    try {
+        const response = await fetch(`${config.API_BASE_URL}/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
+        
+        if (!response.ok) {
+            // Try fallback login for testing
+            if (username === 'admin' && password === 'admin123') {
+                const fallbackUser = {
+                    _id: 'admin_fallback',
+                    name: 'Admin',
+                    username: 'admin',
+                    role: 'admin',
+                    points: 0
+                };
+                localStorage.setItem('currentUser', JSON.stringify(fallbackUser));
+                return fallbackUser;
             }
-        } else {
-            // Add new user with temporary ID
-            const tempUser = {
-                _id: 'temp_' + Date.now(),
-                ...userData
-            };
-            db.users.push(tempUser);
+            throw new Error('Invalid credentials');
         }
         
-        // Salva nel localStorage
-        localStorage.setItem('loomastaff_users', JSON.stringify(db.users));
-    } catch (localError) {
-        console.error('Error saving to localStorage:', localError);
+        const userData = await response.json();
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        return userData;
+    } catch (error) {
+        console.error('Login error:', error);
+        
+        // Fallback for testing
+        if (username === 'admin' && password === 'admin123') {
+            const fallbackUser = {
+                _id: 'admin_fallback',
+                name: 'Admin',
+                username: 'admin',
+                role: 'admin',
+                points: 0
+            };
+            localStorage.setItem('currentUser', JSON.stringify(fallbackUser));
+            return fallbackUser;
+        }
+        
+        throw error;
     }
-    
-    // Ora prova a salvare sul server
+}
+
+async function saveUser(userData, userId = null) {
     try {
         let url = `${config.API_BASE_URL}/users`;
         let method = 'POST';
@@ -86,7 +154,7 @@ async function saveUser(userData, userId = null) {
             method = 'PUT';
         }
         
-        const response = await fetchWithTimeout(url, {
+        const response = await fetch(url, {
             method,
             headers: {
                 'Content-Type': 'application/json'
@@ -94,105 +162,169 @@ async function saveUser(userData, userId = null) {
             body: JSON.stringify(userData)
         });
         
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error('Server error response:', response.status, errorData);
-            throw new Error(errorData.message || `Server returned ${response.status}`);
-        }
+        if (!response.ok) throw new Error('Failed to save user');
         
-        const data = await response.json();
+        const savedUser = await response.json();
         
-        // Aggiorna l'ID temporaneo con quello reale dal server
-        if (!userId) {
-            const tempIndex = db.users.findIndex(u => u._id.startsWith('temp_'));
-            if (tempIndex !== -1) {
-                db.users[tempIndex]._id = data._id;
-                localStorage.setItem('loomastaff_users', JSON.stringify(db.users));
+        // Update local data
+        if (userId) {
+            const index = db.users.findIndex(u => u._id === userId);
+            if (index !== -1) {
+                db.users[index] = savedUser;
             }
+        } else {
+            db.users.push(savedUser);
         }
         
-        return data;
+        // Save to localStorage as backup
+        localStorage.setItem('loomastaff_users', JSON.stringify(db.users));
+        
+        return savedUser;
     } catch (error) {
-        console.error('Error in saveUser API call:', error);
-        // Ritorna comunque i dati locali
-        return userId 
-            ? db.users.find(u => u._id === userId)
-            : db.users[db.users.length - 1];
+        console.error('Error saving user:', error);
+        
+        // Update local data anyway for offline functionality
+        if (userId) {
+            const index = db.users.findIndex(u => u._id === userId);
+            if (index !== -1) {
+                db.users[index] = { ...db.users[index], ...userData };
+            }
+        } else {
+            const newUser = {
+                _id: 'user_' + Date.now(),
+                ...userData
+            };
+            db.users.push(newUser);
+        }
+        
+        // Save to localStorage as backup
+        localStorage.setItem('loomastaff_users', JSON.stringify(db.users));
+        
+        throw error;
     }
 }
 
-// Continua a modificare le altre funzioni API...
-
-// Modify the login function to add better error handling and debugging
-async function login(username, password) {
+async function deleteUser(userId) {
     try {
-        console.log('Attempting login with:', username);
+        const response = await fetch(`${config.API_BASE_URL}/users/${userId}`, {
+            method: 'DELETE'
+        });
         
-        const response = await fetch(`${config.API_BASE_URL}/login`, {
-            method: 'POST',
+        if (!response.ok) throw new Error('Failed to delete user');
+        
+        // Update local data
+        const index = db.users.findIndex(u => u._id === userId);
+        if (index !== -1) {
+            db.users.splice(index, 1);
+            localStorage.setItem('loomastaff_users', JSON.stringify(db.users));
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        
+        // Update local data anyway for offline functionality
+        const index = db.users.findIndex(u => u._id === userId);
+        if (index !== -1) {
+            db.users.splice(index, 1);
+            localStorage.setItem('loomastaff_users', JSON.stringify(db.users));
+        }
+        
+        throw error;
+    }
+}
+
+async function saveTask(taskData, taskId = null) {
+    try {
+        let url = `${config.API_BASE_URL}/tasks`;
+        let method = 'POST';
+        
+        if (taskId) {
+            url = `${config.API_BASE_URL}/tasks/${taskId}`;
+            method = 'PUT';
+        }
+        
+        const response = await fetch(url, {
+            method,
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify(taskData)
         });
         
-        console.log('Login response status:', response.status);
+        if (!response.ok) throw new Error('Failed to save task');
         
-        if (response.ok) {
-            const userData = await response.json();
-            console.log('Login successful, user data:', userData);
-            
-            // Store user data in localStorage for persistence
-            localStorage.setItem('currentUser', JSON.stringify(userData));
-            
-            return userData;
+        const savedTask = await response.json();
+        
+        // Update local data
+        if (taskId) {
+            const index = db.tasks.findIndex(t => t._id === taskId);
+            if (index !== -1) {
+                db.tasks[index] = savedTask;
+            }
+        } else {
+            db.tasks.push(savedTask);
         }
         
-        console.log('Login failed with server response');
+        // Save to localStorage as backup
+        localStorage.setItem('loomastaff_tasks', JSON.stringify(db.tasks));
         
-        // Fallback for testing if server is running but DB is not connected
-        if (username === 'admin' && password === 'admin123') {
-            console.log('Using fallback login');
-            const fallbackUser = {
-                _id: 'fallback-admin-id',
-                name: 'Admin User',
-                username: 'admin',
-                role: 'admin',
-                points: 0
-            };
-            
-            // Store fallback user in localStorage
-            localStorage.setItem('currentUser', JSON.stringify(fallbackUser));
-            
-            return fallbackUser;
-        }
-        
-        return null;
+        return savedTask;
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('Error saving task:', error);
         
-        // Fallback for testing if server is down
-        if (username === 'admin' && password === 'admin123') {
-            console.log('Using offline fallback login');
-            const fallbackUser = {
-                _id: 'fallback-admin-id',
-                name: 'Admin User',
-                username: 'admin',
-                role: 'admin',
-                points: 0
+        // Update local data anyway for offline functionality
+        if (taskId) {
+            const index = db.tasks.findIndex(t => t._id === taskId);
+            if (index !== -1) {
+                db.tasks[index] = { ...db.tasks[index], ...taskData };
+            }
+        } else {
+            const newTask = {
+                _id: 'task_' + Date.now(),
+                ...taskData
             };
-            
-            // Store fallback user in localStorage
-            localStorage.setItem('currentUser', JSON.stringify(fallbackUser));
-            
-            return fallbackUser;
+            db.tasks.push(newTask);
         }
         
-        return null;
+        // Save to localStorage as backup
+        localStorage.setItem('loomastaff_tasks', JSON.stringify(db.tasks));
+        
+        throw error;
     }
 }
 
-// Add or fix the assignPoints function
+async function deleteTask(taskId) {
+    try {
+        const response = await fetch(`${config.API_BASE_URL}/tasks/${taskId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete task');
+        
+        // Update local data
+        const index = db.tasks.findIndex(t => t._id === taskId);
+        if (index !== -1) {
+            db.tasks.splice(index, 1);
+            localStorage.setItem('loomastaff_tasks', JSON.stringify(db.tasks));
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error deleting task:', error);
+        
+        // Update local data anyway for offline functionality
+        const index = db.tasks.findIndex(t => t._id === taskId);
+        if (index !== -1) {
+            db.tasks.splice(index, 1);
+            localStorage.setItem('loomastaff_tasks', JSON.stringify(db.tasks));
+        }
+        
+        throw error;
+    }
+}
+
+// Add the missing assignPoints function
 async function assignPoints(pointsData) {
     try {
         const response = await fetch(`${config.API_BASE_URL}/points-history`, {
@@ -203,15 +335,12 @@ async function assignPoints(pointsData) {
             body: JSON.stringify(pointsData)
         });
         
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Server returned ${response.status}`);
-        }
+        if (!response.ok) throw new Error('Failed to assign points');
         
-        const data = await response.json();
+        const savedPoints = await response.json();
         
         // Update local data
-        db.pointsHistory.push(data);
+        db.pointsHistory.push(savedPoints);
         
         // Update user points
         const userIndex = db.users.findIndex(u => u._id === pointsData.userId);
@@ -219,28 +348,93 @@ async function assignPoints(pointsData) {
             db.users[userIndex].points = (db.users[userIndex].points || 0) + pointsData.points;
         }
         
-        return data;
+        // Save to localStorage as backup
+        localStorage.setItem('loomastaff_points', JSON.stringify(db.pointsHistory));
+        localStorage.setItem('loomastaff_users', JSON.stringify(db.users));
+        
+        return savedPoints;
     } catch (error) {
         console.error('Error assigning points:', error);
         
-        // Add to local data anyway for offline functionality
-        const newPointsEntry = {
+        // Update local data anyway for offline functionality
+        const newPoints = {
             _id: 'points_' + Date.now(),
-            ...pointsData
+            ...pointsData,
+            date: pointsData.date || new Date().toISOString().split('T')[0]
         };
-        db.pointsHistory.push(newPointsEntry);
+        db.pointsHistory.push(newPoints);
         
-        // Update user points locally
+        // Update user points
         const userIndex = db.users.findIndex(u => u._id === pointsData.userId);
         if (userIndex !== -1) {
             db.users[userIndex].points = (db.users[userIndex].points || 0) + pointsData.points;
         }
         
+        // Save to localStorage as backup
+        localStorage.setItem('loomastaff_points', JSON.stringify(db.pointsHistory));
+        localStorage.setItem('loomastaff_users', JSON.stringify(db.users));
+        
         throw error;
     }
 }
 
-// Make sure all functions are properly exported
+async function setEmployeeOfMonth(employeeData) {
+    try {
+        const response = await fetch(`${config.API_BASE_URL}/employee-of-month`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(employeeData)
+        });
+        
+        if (!response.ok) throw new Error('Failed to set employee of month');
+        
+        const savedEmployee = await response.json();
+        
+        // Update local data
+        db.employeeOfMonth = savedEmployee;
+        
+        // Add to previous winners
+        if (db.previousWinners) {
+            db.previousWinners.push(savedEmployee);
+        } else {
+            db.previousWinners = [savedEmployee];
+        }
+        
+        // Save to localStorage as backup
+        localStorage.setItem('loomastaff_employee', JSON.stringify(db.employeeOfMonth));
+        localStorage.setItem('loomastaff_winners', JSON.stringify(db.previousWinners));
+        
+        return savedEmployee;
+    } catch (error) {
+        console.error('Error setting employee of month:', error);
+        
+        // Update local data anyway for offline functionality
+        const newEmployee = {
+            _id: 'employee_' + Date.now(),
+            ...employeeData,
+            date: new Date().toISOString()
+        };
+        
+        db.employeeOfMonth = newEmployee;
+        
+        // Add to previous winners
+        if (db.previousWinners) {
+            db.previousWinners.push(newEmployee);
+        } else {
+            db.previousWinners = [newEmployee];
+        }
+        
+        // Save to localStorage as backup
+        localStorage.setItem('loomastaff_employee', JSON.stringify(db.employeeOfMonth));
+        localStorage.setItem('loomastaff_winners', JSON.stringify(db.previousWinners));
+        
+        throw error;
+    }
+}
+
+// Make sure to export all functions
 export {
     db,
     fetchUsers,
@@ -253,6 +447,6 @@ export {
     deleteUser,
     saveTask,
     deleteTask,
-    assignPoints,  // Make sure this is included in the exports
+    assignPoints,
     setEmployeeOfMonth
 };
